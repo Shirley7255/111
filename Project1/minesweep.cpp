@@ -5,14 +5,15 @@
 #include<easyx.h>
 #include<graphics.h>
 #include<mmsystem.h>
+#include<iomanip>
 #pragma comment(lib,"winmm.lib")
-//闪退
+
 using namespace std;
 #define ROW 10
 #define COL 10
 #define size 40
 int map[ROW][COL] = { 0 };
-IMAGE img[12];//
+IMAGE img[14];//
 
 void initmap(int map[ROW][COL]);
 void loadimg(IMAGE img[]);
@@ -27,7 +28,7 @@ void show(int map[ROW][COL])
 	for (int i = 0; i < ROW; i++)
 	{
 		for (int j = 0; j < COL; j++) {
-			cout << map[i][j] << " ";
+			cout << std::left << setw(4) << map[i][j];
 
 		}
 		cout << endl;
@@ -35,38 +36,98 @@ void show(int map[ROW][COL])
 	cout << endl;
 }
 int main()
-{
-	initgraph(COL * size, ROW * size, EX_SHOWCONSOLE);
+{  
+	initgraph(COL * size, ROW * size,EX_SHOWCONSOLE);
+
+
+
+	
+	//消息变量
+	ExMessage Msg;
+	//加载开始界面 
+	IMAGE menu;
+	loadimage(&menu, _T("./images/14.jpg"));
+	
+
+	putimage(0, 0, &menu);
+	mciSendString("close begin", NULL, 0, NULL);
+	mciSendString("open ./images/begin.mp3 alias start", NULL, 0, NULL);
+	mciSendString("play ./images/begin.mp3", NULL, 0, NULL);
+	while (true)
+	{
+		peekmessage(&Msg, EM_MOUSE);
+		if (Msg.message == WM_LBUTTONDOWN)//点击左键开始游戏
+		{
+			
+			break;
+		}
+		FlushMouseMsgBuffer();
+		flushmessage();
+		Sleep(15);
+	}
+	mciSendString("close begin", NULL, 0, NULL);
 
 
 
 
-	initmap(map);
+    initmap(map);
 	loadimg(img);
-	show(map);
+	//show(map);
 	while (true) {
 		mouse(map);
 		drawmap(map, img);
 		if (isover) {
-			int ret = MessageBox(GetHWnd(), "你做了错饭", "you,lose", MB_OKCANCEL);
-			if (ret == IDOK)
-			{
-				initmap(map);
-				isover = false;
+
+
+			FlushBatchDraw();
+			Sleep(500);
+			cleardevice();
+			IMAGE lose;
+			loadimage(&lose, _T("./images/lose.jpg"));
+			putimage(0, 0, &lose);
+			setbkmode(TRANSPARENT);
+			settextstyle(30, 0, _T("黑体"));
+			settextcolor(WHITE);
+			static TCHAR	text[64];
+			_stprintf_s(text, _T("你做了错饭"));
+			outtextxy(120, 50, text);
+			mciSendString("close shu", NULL, 0, NULL);
+			mciSendString("open ./images/shu.mp3 alias start", NULL, 0, NULL);
+			mciSendString("play ./images/shu.mp3", NULL, 0, NULL);
+
+			while (true) {
+				FlushMouseMsgBuffer();
+				flushmessage();
+				EndBatchDraw();
 			}
-			else {
-				exit(0);
-			}
+			
+			
 		}
 		else if (iswin) {
-			int ret = MessageBox(GetHWnd(), "你做了对饭", "you,lose", MB_OKCANCEL);
-			if (ret == IDOK)
-			{
-				initmap(map);
-				iswin = false;
-			}
-			else {
-				exit(0);
+			
+			FlushBatchDraw();
+			Sleep(500);
+			cleardevice();
+			IMAGE win;
+			loadimage(&win, _T("./images/win.jpg"));
+			putimage(0, 0, &win);
+			setbkmode(TRANSPARENT);
+			settextstyle(30, 0, _T("黑体"));
+			settextcolor(BLACK);
+			static TCHAR	text[64];
+			_stprintf_s(text, _T("你做了对饭"));
+			outtextxy(120, 50, text);
+			mciSendString("close dt", NULL, 0, NULL);
+			mciSendString("open ./images/dt.mp3 alias start", NULL, 0, NULL);
+			mciSendString("play ./images/dt.mp3", NULL, 0, NULL);
+			/*mciSendString("close yeah", NULL, 0, NULL);
+			mciSendString("open ./images/yeah.mp3 alias start", NULL, 0, NULL);
+			mciSendString("play ./images/yeah.mp3", NULL, 0, NULL);*/
+
+			while (true) {
+				FlushMouseMsgBuffer();
+				flushmessage();
+				EndBatchDraw();
 			}
 		}
 	}
@@ -80,9 +141,7 @@ void initmap(int map[ROW][COL]) {
 			map[i][j] = 0;
 		}
 	}
-	mciSendString("close start", NULL, 0, NULL);
-	mciSendString("open ./images/start.mp3 alias start", NULL, 0, NULL);
-	mciSendString("play ./images/start.mp3", NULL, 0, NULL);
+	
 	srand((unsigned)time(NULL));
 	for (int i = 0; i < 10; ) {
 		int r = rand() % ROW;
@@ -116,7 +175,7 @@ void initmap(int map[ROW][COL]) {
 }
 void loadimg(IMAGE img[]) {
 	//加载图片
-	for (int i = 0; i < 12; i++) {
+	for (int i = 0; i < 13; i++) {
 		char imgName[50] = { 0 };
 		sprintf_s(imgName, "./images/%d.jpg", i);
 		loadimage(img + i, imgName, size, size);
